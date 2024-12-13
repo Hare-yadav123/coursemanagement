@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        main {
+            margin: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #007bff;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Course Management Application</h1>
+    </header>
+    <main>
+        <!-- Course Type Section -->
+        <div class="section" id="course-type-section">
+            <h2>Manage Course Types</h2>
+            <form id="course-type-form">
+                <label for="course-type-input">Course Type</label>
+                <input type="text" id="course-type-input" placeholder="Enter course type (e.g., Individual, Group)">
+                <button type="button" onclick="addCourseType()">Add Course Type</button>
+            </form>
+            <table id="course-type-table">
+                <thead>
+                    <tr>
+                        <th>Course Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Course Section -->
+        <div class="section" id="course-section">
+            <h2>Manage Courses</h2>
+            <form id="course-form">
+                <label for="course-input">Course</label>
+                <input type="text" id="course-input" placeholder="Enter course name (e.g., Hindi, English)">
+                <button type="button" onclick="addCourse()">Add Course</button>
+            </form>
+            <table id="course-table">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Publish Course Section -->
+        <div class="section" id="publish-course-section">
+            <h2>Publish Courses</h2>
+            <form id="publish-course-form">
+                <label for="course-type-select">Course Type</label>
+                <select id="course-type-select"></select>
+                <label for="course-select">Course</label>
+                <select id="course-select"></select>
+                <button type="button" onclick="publishCourse()">Publish Course</button>
+            </form>
+            <table id="publish-course-table">
+                <thead>
+                    <tr>
+                        <th>Published Course</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Student Registration Section -->
+        <div class="section" id="registration-section">
+            <h2>Student Registration</h2>
+            <form id="registration-form">
+                <label for="filter-course-type">Filter by Course Type</label>
+                <select id="filter-course-type" onchange="filterPublishedCourses()"></select>
+                <label for="registration-course">Select Course</label>
+                <select id="registration-course"></select>
+                <button type="button" onclick="registerStudent()">Register</button>
+            </form>
+            <table id="registration-table">
+                <thead>
+                    <tr>
+                        <th>Registered Course</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+    <script>
+        const courseTypes = [];
+        const courses = [];
+        const publishedCourses = [];
+        const registrations = [];
+
+        function addCourseType() {
+            const input = document.getElementById('course-type-input');
+            const type = input.value.trim();
+            if (type && !courseTypes.includes(type)) {
+                courseTypes.push(type);
+                updateCourseTypeTable();
+                updateDropdowns();
+                input.value = '';
+            }
+        }
+
+        function addCourse() {
+            const input = document.getElementById('course-input');
+            const course = input.value.trim();
+            if (course && !courses.includes(course)) {
+                courses.push(course);
+                updateCourseTable();
+                updateDropdowns();
+                input.value = '';
+            }
+        }
+
+        function publishCourse() {
+            const courseType = document.getElementById('course-type-select').value;
+            const course = document.getElementById('course-select').value;
+            const published = `${courseType}, ${course}`;
+            if (!publishedCourses.includes(published)) {
+                publishedCourses.push(published);
+                updatePublishCourseTable();
+            }
+        }
+
+        function registerStudent() {
+            const course = document.getElementById('registration-course').value;
+            if (course && !registrations.includes(course)) {
+                registrations.push(course);
+                updateRegistrationTable();
+            }
+        }
+
+        function updateCourseTypeTable() {
+            const tbody = document.querySelector('#course-type-table tbody');
+            tbody.innerHTML = '';
+            courseTypes.forEach(type => {
+                tbody.innerHTML += `<tr><td>${type}</td><td><button onclick="editCourseType('${type}')">Edit</button> <button onclick="deleteCourseType('${type}')">Delete</button></td></tr>`;
+            });
+        }
+
+        function updateCourseTable() {
+            const tbody = document.querySelector('#course-table tbody');
+            tbody.innerHTML = '';
+            courses.forEach(course => {
+                tbody.innerHTML += `<tr><td>${course}</td><td><button onclick="editCourse('${course}')">Edit</button> <button onclick="deleteCourse('${course}')">Delete</button></td></tr>`;
+            });
+        }
+
+        function updatePublishCourseTable() {
+            const tbody = document.querySelector('#publish-course-table tbody');
+            tbody.innerHTML = '';
+            publishedCourses.forEach(published => {
+                tbody.innerHTML += `<tr><td>${published}</td><td><button onclick="editPublishedCourse('${published}')">Edit</button> <button onclick="deletePublishedCourse('${published}')">Delete</button></td></tr>`;
+            });
+        }
+
+        function updateRegistrationTable() {
+            const tbody = document.querySelector('#registration-table tbody');
+            tbody.innerHTML = '';
+            registrations.forEach(registration => {
+                tbody.innerHTML += `<tr><td>${registration}</td><td><button onclick="editRegistration('${registration}')">Edit</button> <button onclick="deleteRegistration('${registration}')">Delete</button></td></tr>`;
+            });
+        }
+
+        function updateDropdowns() {
+            const courseTypeSelect = document.getElementById('course-type-select');
+            const filterCourseTypeSelect = document.getElementById('filter-course-type');
+            const courseSelect = document.getElementById('course-select');
+
+            courseTypeSelect.innerHTML = '<option value="">Select Course Type</option>';
+            filterCourseTypeSelect.innerHTML = '<option value="">Select Course Type</option>';
+            courseTypes.forEach(type => {
+                courseTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+                filterCourseTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+            });
+
+            courseSelect.innerHTML = '<option value="">Select Course</option>';
+            courses.forEach(course => {
+                courseSelect.innerHTML += `<option value="${course}">${course}</option>`;
+            });
+        }
+
+        function filterPublishedCourses() {
+            const filter = document.getElementById('filter-course-type').value;
+            const registrationCourseSelect = document.getElementById('registration-course');
+            registrationCourseSelect.innerHTML = '<option value="">Select Course</option>';
+            publishedCourses.filter(published => published.startsWith(filter)).forEach(course => {
+                registrationCourseSelect.innerHTML += `<option value="${course}">${course}</option>`;
+            });
+        }
+
+        function deleteCourseType(type) {
+            const index = courseTypes.indexOf(type);
+            if (index > -1) {
+                courseTypes.splice(index, 1);
+                updateCourseTypeTable();
+                updateDropdowns();
+            }
+        }
+
+        function deleteCourse(course) {
+            const index = courses.indexOf(course);
+            if (index > -1) {
+                courses.splice(index, 1);
+                updateCourseTable();
+                updateDropdowns();
+            }
+        }
+
+        function deletePublishedCourse(published) {
+            const index = publishedCourses.indexOf(published);
+            if (index > -1) {
+                publishedCourses.splice(index, 1);
+                updatePublishCourseTable();
+            }
+        }
+
+        function deleteRegistration(registration) {
+            const index = registrations.indexOf(registration);
+            if (index > -1) {
+                registrations.splice(index, 1);
+                updateRegistrationTable();
+            }
+        }
+
+        function editCourseType(type) {
+            const newType = prompt("Edit Course Type", type);
+            if (newType && newType !== type) {
+                const index = courseTypes.indexOf(type);
+                if (index > -1) {
+                    courseTypes[index] = newType;
+                    updateCourseTypeTable();
+                    updateDropdowns();
+                }
+            }
+        }
+
+        function editCourse(course) {
+            const newCourse = prompt("Edit Course", course);
+            if (newCourse && newCourse !== course) {
+                const index = courses.indexOf(course);
+                if (index > -1) {
+                    courses[index] = newCourse;
+                    updateCourseTable();
+                    updateDropdowns();
+                }
+            }
+        }
+
+        function editPublishedCourse(published) {
+            alert("Editing Published Courses is not currently supported.");
+        }
+
+        function editRegistration(registration) {
+            alert("Editing Registrations is not currently supported.");
+        }
+    </script>
+</body>
+</html>
